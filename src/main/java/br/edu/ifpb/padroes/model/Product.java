@@ -1,5 +1,7 @@
 package br.edu.ifpb.padroes.model;
 
+import br.edu.ifpb.padroes.service.impl.visitor.TotalDiscount;
+import br.edu.ifpb.padroes.service.impl.visitor.Visitor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
@@ -82,6 +84,10 @@ public abstract class Product {
 
         return id.equals(product.id);
     }
+
+    public abstract BigDecimal accept(Visitor visitor);
+
+    public abstract BigDecimal accept(Visitor visitor, BigDecimal discount);
 
     @Override
     public int hashCode() {
