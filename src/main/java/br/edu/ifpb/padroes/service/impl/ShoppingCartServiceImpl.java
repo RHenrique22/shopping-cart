@@ -6,6 +6,7 @@ import br.edu.ifpb.padroes.model.Electronic;
 import br.edu.ifpb.padroes.model.Product;
 import br.edu.ifpb.padroes.repository.ProductRepository;
 import br.edu.ifpb.padroes.service.ShoppingCartService;
+import br.edu.ifpb.padroes.service.impl.visitor.TotalDiscount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -31,10 +32,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     private final ProductRepository productRepository;
 
-    private static final BigDecimal BOOK_DISCOUNT = BigDecimal.valueOf(0.3); // 30 %
-    private static final BigDecimal ELECTRONIC_DISCOUNT = BigDecimal.valueOf(0.05); // 5 %
-
     private Map<Product, Integer> products = new HashMap<>();
+    private TotalDiscount discount = new TotalDiscount();
 
     @Autowired
     public ShoppingCartServiceImpl(ProductRepository productRepository) {
@@ -86,9 +85,30 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     @Override
     public BigDecimal getTotalDiscount() {
-        return
-                products.keySet().stream().filter(Book.class::isInstance).map(product -> product.getPrice().multiply(BOOK_DISCOUNT).multiply(BigDecimal.valueOf(products.get(product)))).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)
-                        .add(products.keySet().stream().filter(Electronic.class::isInstance).map(product -> product.getPrice().multiply(ELECTRONIC_DISCOUNT).multiply(BigDecimal.valueOf(products.get(product)))).reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
+        return this.discount.calcDiscount(products, null);
+        /* this.discount.calcDiscount(products, BigDecimal.valueof(0.5)); */
+
+        /* stream
+        products.keySet()
+                       .stream()
+                       .filter(Book.class::isInstance)
+                       .map(
+                            product -> product.getPrice()
+                                              .multiply(BOOK_DISCOUNT)
+                                              .multiply(BigDecimal.valueOf(products.get(product)))
+                       )
+                       .reduce(BigDecimal::add)
+                       .orElse(BigDecimal.ZERO)
+                       .add(products.keySet()
+                       .stream()
+                       .filter(Electronic.class::isInstance)
+                       .map(
+                           product -> product.getPrice()
+                                             .multiply(ELECTRONIC_DISCOUNT)
+                                             .multiply(BigDecimal.valueOf(products.get(product)))
+                       )
+                       .reduce(BigDecimal::add)
+                       .orElse(BigDecimal.ZERO));*/
     }
 
     /**
@@ -113,9 +133,15 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public BigDecimal getTotal() {
-        return products.entrySet().stream()
-                .map(entry -> entry.getKey().getPrice().multiply(BigDecimal.valueOf(entry.getValue())))
+        return products.entrySet()
+                .stream()
+                .map(
+                        entry -> entry.getKey()
+                                .getPrice()
+                                .multiply(BigDecimal.valueOf(entry.getValue()))
+                )
                 .reduce(BigDecimal::add)
-                .orElse(BigDecimal.ZERO).subtract(getTotalDiscount());
+                .orElse(BigDecimal.ZERO)
+                .subtract(getTotalDiscount());
     }
 }

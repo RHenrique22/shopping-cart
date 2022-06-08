@@ -34,11 +34,15 @@
     </div>
 
     <div class="row panel-body">
-        <h3 class="col-md-11" th:inline="text">Desconto: [[${discount}]]</h3>
+        <h3 class="col-md-11" th:inline="text">
+            Desconto: R$ [[${#numbers.formatDecimal(discount, 0, 'POINT', 2, 'COMMA')}]]
+        </h3>
     </div>
 
     <div class="row panel-body">
-        <h2 class="col-md-11" th:inline="text">Total: [[${total}]]</h2>
+        <h2 class="col-md-11" th:inline="text">
+            Total: R$ [[${#numbers.formatDecimal(total, 0, 'POINT', 2, 'COMMA')}]]
+        </h2>
         <a th:href="@{'/shoppingCart/checkout'}" class="col-md-1">
             <button type="button" class="btn btn-danger" th:text="Finalizar">Finalizar Pedido</button>
         </a>
